@@ -1,4 +1,6 @@
 import sqlite3
+from typing import List
+
 import settings
 from db.fields import (
     Field,
@@ -23,7 +25,7 @@ class SoftDrink(object):
 
     def __init__(self, trademark: str, producer: str, ):
         self.connection = sqlite3.connect(settings.DATABASES["DEFAULT"])
-        self._create_table(self.connection, self.table_name, columns=[self.key, 'trademark', 'producer'])
+        self._create_table(self.connection, extra=[self.table_name, self.key, *self._get_descriptor_columns()])
         self.id = next(autoincrement)
         self.trademark = trademark
         self.producer = producer
@@ -36,8 +38,15 @@ class SoftDrink(object):
         self.connection.execute(deletion_command, [self.id])
         self.connection.commit()
 
+    def _get_descriptor_columns(self) -> List[str]:
+        column_names = []
+        attrs = vars(self.__class__)
+        for k, v in attrs.items():
+            if isinstance(v, Field):
+                column_names.append(k)
+        return column_names
+
     @staticmethod
-    def _create_table(connection, table_name, columns):
-        create_table_command = f"""CREATE TABLE IF NOT EXISTS {table_name} 
-            ({columns[0]} int PRIMARY KEY, {columns[1]} varchar(255), {columns[2]} varchar(255));"""
-        connection.execute(create_table_command)
+    def _create_table(connection, extra):
+        create_table_cmd = "CREATE TABLE IF NOT EXISTS {0} ({1} int PRIMARY KEY, {2} varchar(255), {3} varchar(255));"
+        connection.execute(create_table_cmd.format(*extra))

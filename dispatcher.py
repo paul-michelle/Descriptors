@@ -14,3 +14,6 @@ class PreInitActionManager(object):
 
     def check_signals_registry(self, sender_name: str) -> List[Optional[Callback]]:
         return self._signals_registry.get(sender_name, [])
+
+
+pre_init = PreInitActionManager()
