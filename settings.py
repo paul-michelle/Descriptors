@@ -1,0 +1,3 @@
+DATABASES = {
+    "DEFAULT": "beverages"
+}
