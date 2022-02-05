@@ -1,3 +1,0 @@
-DATABASES = {
-    "DEFAULT": "beverages"
-}

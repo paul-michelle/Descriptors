@@ -1,8 +1,6 @@
-import sqlite3
+from beverages_app.settings import DB_CONNECTION
 from typing import List
-
-import settings
-from db.fields import (
+from framework.db.fields import (
     Field,
 )
 
@@ -17,18 +15,20 @@ def generate_ints():
 autoincrement = generate_ints()
 
 
-class SoftDrink(object):
+class BaseModel(object):
     key = 'pk'
-    table_name = f'{__qualname__.lower()}s_table'
-    trademark = Field(max_length=8)
-    producer = Field(max_length=8)
+    connection = DB_CONNECTION
 
-    def __init__(self, trademark: str, producer: str, ):
-        self.connection = sqlite3.connect(settings.DATABASES["DEFAULT"])
-        self._create_table(self.connection, extra=[self.table_name, self.key, *self._get_descriptor_columns()])
+    def __init__(self):
+        self.table_name = f'{self.__class__.__name__.lower()}s_table'
         self.id = next(autoincrement)
-        self.trademark = trademark
-        self.producer = producer
+        self._create_table(
+            self.connection, extra=[
+                self.table_name,
+                self.key,
+                *self._get_descriptor_columns()
+            ]
+        )
 
     def __getitem__(self, key):
         return self.__getattribute__(key)

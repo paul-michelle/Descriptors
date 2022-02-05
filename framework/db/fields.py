@@ -1,7 +1,20 @@
 import sqlite3
-from db.base_field import BaseFieldDescriptor
 
 VARCHAR_LENGTH = 255
+
+
+class BaseFieldDescriptor(object):
+    def __set_name__(self, owner, name):
+        raise NotImplementedError
+
+    def __get__(self, instance, owner):
+        raise NotImplementedError
+
+    def __set__(self, instance, value):
+        raise NotImplementedError
+
+    def _validate(self, *args, **kwargs):
+        raise NotImplementedError
 
 
 class Field(BaseFieldDescriptor):
@@ -10,9 +23,10 @@ class Field(BaseFieldDescriptor):
         self._max_length = max_length
 
     def __set_name__(self, owner, name):
-        self._retrieve = f'SELECT {name} FROM {owner.table_name} WHERE {owner.key}=?;'
+        self._table_name = f'{owner.__name__.lower()}s_table'
+        self._retrieve = f'SELECT {name} FROM {self._table_name} WHERE {owner.key}=?;'
         self._update = f"""
-            INSERT INTO {owner.table_name}({owner.key}, {name}) VALUES(?, ?) 
+            INSERT INTO {self._table_name}({owner.key}, {name}) VALUES(?, ?) 
             ON CONFLICT({owner.key}) DO UPDATE SET {name}=?;
             """
 
