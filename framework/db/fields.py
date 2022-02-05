@@ -31,18 +31,18 @@ class Field(BaseFieldDescriptor):
             """
 
     def __get__(self, instance, owner):
-        connection = self._get_connection(instance)
-        try:
-            exe_results = connection.execute(self._retrieve, [instance.id]).fetchone()
-        except sqlite3.OperationalError as e:
-            raise RuntimeError(f'ERROR! {e}') from e
-        return exe_results[0]
+        with self._get_connection(instance) as connection:
+            try:
+                exe_results = connection.execute(self._retrieve, [instance.id]).fetchone()
+            except sqlite3.OperationalError as e:
+                raise RuntimeError(f'ERROR! {e}') from e
+            return exe_results[0]
 
     def __set__(self, instance, value):
         self._validate(value=value)
-        connection = self._get_connection(instance)
-        connection.execute(self._update, [instance.id, value, value])
-        connection.commit()
+        with self._get_connection(instance) as connection:
+            connection.execute(self._update, [instance.id, value, value])
+            connection.commit()
 
     def _validate(self, *args, **kwargs):
         if not isinstance(kwargs['value'], str):
@@ -56,4 +56,5 @@ class Field(BaseFieldDescriptor):
             connection = instance['connection'] or instance['conn']
         except KeyError:
             raise RuntimeError('Failed to determine database connection')
+
         return connection

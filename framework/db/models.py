@@ -1,4 +1,5 @@
 from beverages_app.settings import DB_CONNECTION
+from framework.tools.dispatcher import pre_init
 from typing import List
 from framework.db.fields import (
     Field,
@@ -18,6 +19,14 @@ autoincrement = generate_ints()
 class BaseModel(object):
     key = 'pk'
     connection = DB_CONNECTION
+
+    def __new__(cls, *args, **kwargs):
+        instance = super().__new__(cls, *args, **kwargs)
+        callbacks = pre_init.check_signals_registry(instance.__class__.__name__)
+        if callbacks:
+            for callback in callbacks:
+                callback()
+        return instance
 
     def __init__(self):
         self.table_name = f'{self.__class__.__name__.lower()}s_table'

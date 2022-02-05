@@ -3,5 +3,5 @@ from framework.db.fields import Field
 
 
 class SoftDrink(BaseModel):
-    trademark = Field(max_length=8)
-    producer = Field(max_length=8)
+    trademark = Field(max_length=16)
+    producer = Field(max_length=16)

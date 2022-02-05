@@ -1,4 +1,6 @@
 .idea
-beverages
 __pycache__
 *.py[c]
+
+beverages_app/beverages
+beverages_app/beverages_logs.txt

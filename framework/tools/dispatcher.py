@@ -10,7 +10,9 @@ class PreInitActionManager(object):
         self._signals_registry = {}
 
     def connect(self, receiver: Callback, sender: T) -> None:
-        self._signals_registry[sender.__name__] = [].append(receiver)
+        if not self._signals_registry.get(sender.__name__):
+            self._signals_registry[sender.__name__] = []
+        self._signals_registry[sender.__name__].append(receiver)
 
     def check_signals_registry(self, sender_name: str) -> List[Optional[Callback]]:
         return self._signals_registry.get(sender_name, [])
